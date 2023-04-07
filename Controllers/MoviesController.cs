@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
+using MoviesAPI.Migrations;
 using MoviesAPI.Services;
 using System.ComponentModel;
 
@@ -36,7 +37,9 @@ namespace MoviesAPI.Controllers
         public async Task<ActionResult<MovieDTO>> Get(int id)
         {
 
-            var movie = await context.Movies.FirstOrDefaultAsync(a => a.Id == id);
+            var movie = await context.Movies
+                .Include(a => a.MoviesGenres)
+                .Include(a => a.MoviesActors).FirstOrDefaultAsync(a => a.Id == id);
             if (movie is null)
             {
                 return NotFound();
@@ -61,6 +64,7 @@ namespace MoviesAPI.Controllers
                     movie.Poster = await fileManager.SaveFile(content, extension, container, movieCreationDTO.Poster.ContentType);
                 }
             }
+            AssignOrderToActors(movie);
             context.Add(movie);
             await context.SaveChangesAsync();
             var dto = mapper.Map<MovieDTO>(movie);
@@ -70,7 +74,10 @@ namespace MoviesAPI.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromForm] MovieCreationDTO movieCreationDTO)
         {
-            var movieDB = await context.Movies.FirstOrDefaultAsync(a => a.Id == id);
+            var movieDB = await context.Movies
+                .Include(a=> a.MoviesGenres)
+                .Include(a=> a.MoviesActors)
+                .FirstOrDefaultAsync(a => a.Id == id);
 
             if (movieDB is null)
             {
@@ -89,6 +96,7 @@ namespace MoviesAPI.Controllers
                     movieDB.Poster = await fileManager.EditFile(content, extension, container, movieCreationDTO.Poster.ContentType, movieDB.Poster);
                 }
             }
+            AssignOrderToActors(movieDB);
 
             await context.SaveChangesAsync();
             return NoContent();
@@ -138,6 +146,18 @@ namespace MoviesAPI.Controllers
             context.Remove(new Movie { Id = id });
             await context.SaveChangesAsync();
             return NoContent();
+        }
+
+        private void AssignOrderToActors(Movie movie) {
+
+            if (movie.MoviesActors is not null) {
+
+                for (int i = 0; i < movie.MoviesActors.Count; i++)
+                {
+                    movie.MoviesActors[i].Order = i;
+                }
+            }
+
         }
     }
 }
