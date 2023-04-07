@@ -23,6 +23,7 @@ namespace MoviesAPI
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnection")));
             services.AddRazorPages();
+            services.AddControllers().AddNewtonsoftJson();
         }
         public void Configure(WebApplication app, IWebHostEnvironment env)
         {

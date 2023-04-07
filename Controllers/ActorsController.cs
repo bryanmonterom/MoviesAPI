@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
@@ -31,7 +32,7 @@ namespace MoviesAPI.Controllers
             return mapper.Map<List<ActorDTO>>(entities);
         }
 
-        [HttpGet("{id:int}", Name = "getActor")]
+        [HttpGet("{id}", Name = "getActor")]
         public async Task<ActionResult<ActorDTO>> Get(int id)
         {
             var entity = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
@@ -70,7 +71,8 @@ namespace MoviesAPI.Controllers
 
             var actorDB = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
 
-            if (actorDB is null) {
+            if (actorDB is null)
+            {
                 return NotFound();
             }
 
@@ -91,6 +93,39 @@ namespace MoviesAPI.Controllers
             return NoContent();
 
         }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<ActorPatchDTO> patchDocument)
+        {
+
+            if (patchDocument is null)
+            {
+                return BadRequest();
+            }
+
+            var entity = await context.Actors.FirstOrDefaultAsync(a => a.Id == id);
+
+            if (entity is null)
+            {
+
+                return NotFound();
+            }
+
+            var entityDTO = mapper.Map<ActorPatchDTO>(entity);
+            patchDocument.ApplyTo(entityDTO, ModelState);
+
+            var isValid = TryValidateModel(entityDTO);
+            if (!isValid)
+            {
+
+                return BadRequest(ModelState);
+            }
+
+            mapper.Map(entityDTO, entity);
+            await context.SaveChangesAsync();
+            return NoContent();
+        }
+
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
