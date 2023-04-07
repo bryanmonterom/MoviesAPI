@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
+using MoviesAPI.Helpers;
 using MoviesAPI.Services;
 
 namespace MoviesAPI.Controllers
@@ -26,9 +27,13 @@ namespace MoviesAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ActorDTO>>> Get()
+        public async Task<ActionResult<List<ActorDTO>>> Get([FromQuery] PaginationDTO paginationDTO)
         {
-            var entities = await context.Actors.ToListAsync();
+            var queryable = context.Actors.AsQueryable();
+            await HttpContext.InsertPaginationParameters(queryable, paginationDTO.RecordsQuantityPerPage);
+            var entities = queryable.Paginate(paginationDTO).ToListAsync();
+
+
             return mapper.Map<List<ActorDTO>>(entities);
         }
 
