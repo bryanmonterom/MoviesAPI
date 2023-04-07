@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MoviesAPI.Services;
 
 namespace MoviesAPI
 {
@@ -16,6 +17,9 @@ namespace MoviesAPI
         {
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddTransient<IFileManager, FileManagerLocal>();
+            services.AddHttpContextAccessor();
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnection")));
             services.AddRazorPages();

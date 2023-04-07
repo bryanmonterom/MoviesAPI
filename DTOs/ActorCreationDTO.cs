@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MoviesAPI.Validations;
+using System.ComponentModel.DataAnnotations;
 
 namespace MoviesAPI.DTOs
 {
@@ -8,5 +9,8 @@ namespace MoviesAPI.DTOs
         [StringLength(120)]
         public string Name { get; set; }
         public DateTime DOB { get; set; }
+        [FileSizeValidation(maxSizeInMb:4)]
+        [FileTypeValidation(fileTypeGroup: FileTypeGroup.Image)]
+        public IFormFile Photo { get; set; }
     }
 }
