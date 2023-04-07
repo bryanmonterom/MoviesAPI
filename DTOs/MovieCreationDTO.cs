@@ -9,5 +9,6 @@ namespace MoviesAPI.DTOs
         [FileSizeValidation(maxSizeInMb:4)]
         [FileTypeValidation(FileTypeGroup.Image)] 
         public IFormFile Poster { get; set; }
+        public List<int> GenresId { get; set; }
     }
 }
