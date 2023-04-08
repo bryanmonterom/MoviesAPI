@@ -17,14 +17,14 @@ namespace MoviesAPI.Controllers
 {
     [ApiController]
     [Route("api/accounts")]
-    public class CuentasController : CustomBaseController
+    public class AccountsController : CustomBaseController
     {
         private readonly UserManager<IdentityUser> _userManager;
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly ApplicationDbContext context;
 
-        public CuentasController(
+        public AccountsController(
             UserManager<IdentityUser> userManager,
             SignInManager<IdentityUser> signInManager,
             IConfiguration configuration,
