@@ -67,6 +67,8 @@ namespace MoviesAPI
                     };
                 });
 
+            services.AddScoped<MovieExistAttribute>();
+
 
         }
         public void Configure(WebApplication app, IWebHostEnvironment env)

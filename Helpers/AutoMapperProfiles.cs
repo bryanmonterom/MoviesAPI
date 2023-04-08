@@ -43,6 +43,12 @@ namespace MoviesAPI.Helpers
 
             CreateMap<IdentityUser, UserDTO>();
             CreateMap<MoviePatchDTO, Movie>().ReverseMap();
+
+            CreateMap<Review, ReviewDTO>().ForMember(a=> a.UserName, options => options.MapFrom(a=> a.User.UserName));
+            CreateMap<ReviewDTO, Review>();
+            CreateMap<ReviewCreationDTO, Review>();
+
+
         }
 
         private List<MoviesGenres> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)

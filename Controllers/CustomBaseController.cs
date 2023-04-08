@@ -23,10 +23,17 @@ namespace MoviesAPI.Controllers
         {
 
             var queryable = context.Set<TEntity>().AsQueryable();
+            return await Get<TEntity, TDTO>(paginationDTO, queryable);
+      
+        }
+
+
+        protected async Task<List<TDTO>> Get<TEntity, TDTO>(PaginationDTO paginationDTO, IQueryable<TEntity> queryable) where TEntity : class
+        {
+
             await HttpContext.InsertPaginationParameters(queryable, paginationDTO.RecordsQuantityPerPage);
             var entities = await queryable.Paginate(paginationDTO).ToListAsync();
             return mapper.Map<List<TDTO>>(entities);
-
         }
 
         protected async Task<List<TDTO>> Get<TEntity, TDTO>() where TEntity : class
