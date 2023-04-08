@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Entities;
+using NetTopologySuite.Geometries;
+using NetTopologySuite;
 using System.Reflection.Emit;
 
 namespace MoviesAPI
@@ -33,6 +35,17 @@ namespace MoviesAPI
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+
+            var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
+
+            modelBuilder.Entity<Theater>()
+               .HasData(new List<Theater>
+               {
+                    //new SalaDeCine{Id = 1, Nombre = "Agora", Ubicacion = geometryFactory.CreatePoint(new Coordinate(-69.9388777, 18.4839233))},
+                    new Theater{Id = 4, Name = "Sambil", Location = geometryFactory.CreatePoint(new Coordinate(-69.9118804, 18.4826214))},
+                    new Theater{Id = 5, Name = "Megacentro", Location = geometryFactory.CreatePoint(new Coordinate(-69.856427, 18.506934))},
+                    new Theater{Id = 6, Name = "Village East Cinema", Location = geometryFactory.CreatePoint(new Coordinate(-73.986227, 40.730898))}
+               });
 
             var aventura = new Genre() { Id = 4, Name = "Aventura" };
             var animation = new Genre() { Id = 5, Name = "Animación" };

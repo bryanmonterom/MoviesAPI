@@ -1,18 +1,30 @@
 ﻿using AutoMapper;
 using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 namespace MoviesAPI.Helpers
 {
     public class AutoMapperProfiles : Profile
     {
-        public AutoMapperProfiles()
+        private readonly GeometryFactory geometryFactory;
+
+        public AutoMapperProfiles(GeometryFactory geometryFactory)
         {
             CreateMap<Genre, GenreDTO>().ReverseMap();
             CreateMap<GenreCreationDTO, Genre>();
 
-            CreateMap<Theater, TheaterDTO>().ReverseMap();
-            CreateMap<TheaterCreationDTO, Theater>();
+            CreateMap<Theater, TheaterDTO>()
+                .ForMember(a => a.Latitude, options => options.MapFrom(b => b.Location.Y))
+                .ForMember(a => a.Longitude, options => options.MapFrom(b => b.Location.X));
+
+
+            CreateMap<TheaterCreationDTO, Theater>()
+                .ForMember(a=> a.Location, options=> options.MapFrom(b=>  geometryFactory.CreatePoint(new Coordinate(b.Longitude, b.Latitude))));
+
+            CreateMap<TheaterDTO, Theater>()
+          .ForMember(a => a.Location, options => options.MapFrom(b => geometryFactory.CreatePoint(new Coordinate(b.Longitude, b.Latitude))));
 
             CreateMap<Actor, ActorDTO>().ReverseMap();
             CreateMap<ActorCreationDTO, Actor>().ForMember(a => a.Photo, options => options.Ignore());
@@ -31,6 +43,7 @@ namespace MoviesAPI.Helpers
 
 
             CreateMap<MoviePatchDTO, Movie>().ReverseMap();
+            this.geometryFactory = geometryFactory;
         }
 
         private List<MoviesGenres> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)
@@ -96,10 +109,12 @@ namespace MoviesAPI.Helpers
             }
             foreach (var actor in movie.MoviesActors)
             {
-                result.Add(new MovieActorDetailDTO() {
-                    Id = actor.ActorId, 
-                    ActorName = actor.Actor.Name, 
-                    Character = actor.Character });
+                result.Add(new MovieActorDetailDTO()
+                {
+                    Id = actor.ActorId,
+                    ActorName = actor.Actor.Name,
+                    Character = actor.Character
+                });
             }
             return result;
 

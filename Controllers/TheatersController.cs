@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
+using NetTopologySuite.Geometries;
 
 namespace MoviesAPI.Controllers
 {
@@ -9,9 +11,15 @@ namespace MoviesAPI.Controllers
     [ApiController]
     public class TheatersController : CustomBaseController
     {
-        public TheatersController(ApplicationDbContext context, IMapper mapper) : base(context, mapper)
-        {
+        private readonly ApplicationDbContext context;
+        private readonly IMapper mapper;
+        private readonly GeometryFactory geometryFactory;
 
+        public TheatersController(ApplicationDbContext context, IMapper mapper, GeometryFactory geometryFactory) : base(context, mapper)
+        {
+            this.context = context;
+            this.mapper = mapper;
+            this.geometryFactory = geometryFactory;
         }
 
         [HttpGet]
@@ -26,6 +34,27 @@ namespace MoviesAPI.Controllers
         {
 
             return await Get<Theater, TheaterDTO>(id);
+        }
+
+        [HttpGet("NearBy")]
+        public async Task<ActionResult<List<TheaterNearDTO>>> NearBy([FromQuery] TheatersNearFilterDTO theatersNearFilterDTO) { 
+        
+            var userLocation = geometryFactory.CreatePoint(new Coordinate(theatersNearFilterDTO.Longitude, theatersNearFilterDTO.Latitude));
+            var theaters = await context.Theaters.OrderBy(a => a.Location.Distance(userLocation)).
+                Where(a => a.Location.IsWithinDistance(userLocation, theatersNearFilterDTO.DistanceInKms * 1000))
+                .Select(a => new TheaterNearDTO
+                {
+
+                    Id = a.Id,
+                    DistanceInMeters = Math.Round(a.Location.Distance(userLocation)),
+                    Latitude = a.Location.Y,
+                    Longitude = a.Location.X,
+                    Name = a.Name,
+
+                }).ToListAsync();
+
+            return theaters;
+
         }
 
         [HttpPost]
