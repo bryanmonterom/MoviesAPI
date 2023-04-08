@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using MoviesAPI.DTOs;
 using MoviesAPI.Entities;
 using NetTopologySuite;
@@ -8,7 +9,6 @@ namespace MoviesAPI.Helpers
 {
     public class AutoMapperProfiles : Profile
     {
-        private readonly GeometryFactory geometryFactory;
 
         public AutoMapperProfiles(GeometryFactory geometryFactory)
         {
@@ -41,9 +41,8 @@ namespace MoviesAPI.Helpers
                 .ForMember(a => a.Genres, options => options.MapFrom(MapMoviesGenres))
                 .ForMember(a => a.Actors, options => options.MapFrom(MapMoviesActors));
 
-
+            CreateMap<IdentityUser, UserDTO>();
             CreateMap<MoviePatchDTO, Movie>().ReverseMap();
-            this.geometryFactory = geometryFactory;
         }
 
         private List<MoviesGenres> MapMoviesGenres(MovieCreationDTO movieCreationDTO, Movie movie)

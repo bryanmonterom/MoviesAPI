@@ -2,11 +2,13 @@
 using MoviesAPI.Entities;
 using NetTopologySuite.Geometries;
 using NetTopologySuite;
-using System.Reflection.Emit;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace MoviesAPI
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         {
@@ -35,6 +37,46 @@ namespace MoviesAPI
 
         private void SeedData(ModelBuilder modelBuilder)
         {
+
+
+            var rolAdminId = "9aae0b6d-d50c-4d0a-9b90-2a6873e3845d";
+            var usuarioAdminId = "5673b8cf-12de-44f6-92ad-fae4a77932ad";
+
+            var rolAdmin = new IdentityRole()
+            {
+                Id = rolAdminId,
+                Name = "Admin",
+                NormalizedName = "Admin"
+            };
+
+            var passwordHasher = new PasswordHasher<IdentityUser>();
+
+            var username = "bmontero@hotmail.com";
+
+            var usuarioAdmin = new IdentityUser()
+            {
+                Id = usuarioAdminId,
+                UserName = username,
+                NormalizedUserName = username,
+                Email = username,
+                NormalizedEmail = username,
+                PasswordHash = passwordHasher.HashPassword(null, "Aa123456@")
+            };
+
+            //modelBuilder.Entity<IdentityUser>()
+            //    .HasData(usuarioAdmin);
+
+            //modelBuilder.Entity<IdentityRole>()
+            //    .HasData(rolAdmin);
+
+            //modelBuilder.Entity<IdentityUserClaim<string>>()
+            //    .HasData(new IdentityUserClaim<string>()
+            //    {
+            //        Id = 1,
+            //        ClaimType = ClaimTypes.Role,
+            //        UserId = usuarioAdminId,
+            //        ClaimValue = "Admin"
+            //    });
 
             var geometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
 
