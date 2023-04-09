@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -38,7 +39,24 @@ namespace MoviesAPI
 
             );
 
-            services.AddTransient<IFileManager, FileManagerLocal>();
+            services.AddTransient<IFileManager>((serviceProvider) => { 
+            
+                var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+
+                if (env.IsDevelopment())
+                {
+                    var httpContext = serviceProvider.GetRequiredService<IHttpContextAccessor>();
+                    return new FileManagerLocal(env, httpContext);
+
+                }
+                else {
+
+                    //retornar una instanacia de azure, aws, tiene que ser una clase que implementa la interfaz
+                    return null;
+
+                }
+
+            });
             services.AddHttpContextAccessor();
 
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnection"),
