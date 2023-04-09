@@ -44,7 +44,11 @@ namespace MoviesAPI
             services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(configRoot.GetConnectionString("DefaultConnection"),
                 sqlServerOptions => sqlServerOptions.UseNetTopologySuite()));
             services.AddRazorPages();
-            services.AddControllers().AddNewtonsoftJson();
+            services.AddControllers(options => {
+
+                options.Filters.Add(typeof(ErrorsFilter));
+
+            }).AddNewtonsoftJson();
 
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
